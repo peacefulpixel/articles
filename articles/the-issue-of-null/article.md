@@ -512,9 +512,9 @@ public static Optional<String> getUserNameById(Integer id) {
 }
 ```
 
-See, there's a big possibility to chain multiple optional operations that depenends on each previous, prefectly combined with streams and its functions. It loooks like Monad ([if I actually understand what is this though]([functional programming - Why are monads hard to explain? - Stack Overflow](https://stackoverflow.com/questions/70453016/why-are-monads-hard-to-explain))), to have an ability to exclude inextistence from operation you do.
+See, there's a big possibility to chain multiple optional operations that depenends on each previous, prefectly combined with streams and its functions. It loooks like Monad ([if I actually understand what is this though](https://stackoverflow.com/questions/70453016/why-are-monads-hard-to-explain)), to have an ability to exclude inextistence from operation you do.
 
-Anyway, maybe this code is perfect only for me, so you can just ignore it.
+Anyway, maybe this code is perfect only for me, so yo2u can just ignore it.
 
 ## Data sources and useful links
 
