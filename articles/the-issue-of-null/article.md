@@ -12,7 +12,7 @@ The ``null`` by itself is a unique value for any type (exluding primitives) and 
 
 The staticly typed code usually rely on expectations. When all the methods and functions explicitly defines a type of what they returns, and you know that compiler will not let them return anything else, you also sure about it and you writing your code by expecting it. When there's a method ``User getCurrentUser()`` it makes you belive that you will get a ``User``, not a ``Car``, ``Kittie``, or anything else. Only ``User``. Or ``null``... And if you say that it's an obvious thing to you, then you're a huge lier and i'll try to prove it. Look at the following code:
 
-```Java
+```java
 public class UserUtils {
 
     public static String getFullUserName(User user) {
@@ -23,7 +23,7 @@ public class UserUtils {
 
 Looks pretty simple right? But what if ``user`` is ``null``? Or what if ``user.surname()`` will return ``null``? You never know the origin of the ``User`` object you receive, and how it was built, which its fields were assigned and which not. You also couldn't be sure how other programmer will use your method and will he know that it might produce an NPE? Well, probably that was just a bad code, so we have to rewrite it to something like:
 
-```Java
+```java
 if (user != null) {
     final var builder = new StringBuilder();
     if (user.name() != null) {
@@ -105,7 +105,7 @@ Sometimes you may try to get a thing, but you get an unexpceted exception. That 
 
 There are two possible solutions: forward exception or wrap it into runtime one. Choose of solution is up to you, the both ways are conventioned, but they're still different. Let's look on both
 
-```Java
+```java
 public class Application {
     private Database db = null;
 
@@ -132,7 +132,7 @@ The first way with forwarding is more appliable to critical parts of code, where
 
 Well, you could actually combine two these ways by using a javadoc:
 
-```Java
+```java
 /**
  * Initializes a database connection
  * @throws RuntimeException when connection couldn't be initialized or wrong credentials
@@ -156,7 +156,7 @@ But what if thing just not exists yet or anymore? What if you definetly sure tha
 
 There's a way in default Java API to handle null values - ``Objects.requireNonNull()`` method.
 
-```Java
+```java
 import java.util.Objects;
 
 public class Application {
@@ -171,7 +171,7 @@ Usually this check goes on the ``getDatabase()`` invoker side, because it may co
 
 Has-method is a method that returns ``boolean`` value indicating an existance of something.
 
-```Java
+```java
 public class Application {
 
     public Database getDatabase() {
@@ -186,7 +186,7 @@ public class Application {
 
 Here, an ``Application`` instance owner knows that you have some method ``boolean hasDatabase()``, which obviously indicates about a "database" existance, so it might not exist. Also, an owner could write more readable code for checking it, which directly improves a code quality:
 
-```Java
+```java
 public class ApplicationManager {
     private final Set<Application> apps;
 
@@ -216,7 +216,7 @@ Also, there's an ``Optional`` class exists, but it will be the next one
 
 Sometimes we using ``null`` when we couldn't return a thing, but it's not that neccesarry for execution to throw an exception and drop the whole stack of calls. In this case, the ``Optional`` class appears
 
-```Java
+```java
 import java.util.Optional;
 
 public class Application {
@@ -236,18 +236,41 @@ public class Application {
 }
 ```
 
-If you're not familiar with this one, it's a beautiful replacement for previous solution, but not everywhere. 
-
-> The short description of what that ``Optional`` does (may skip if already know)
-> 
-> > ``Optional`` object may hold value or nothing and you could easly check that. It also provides convinient function
-> > interfaces like ``orElse(/*AnotherInstance*/)`` or ``ifPresent(i -> {/*action*/})``.
-
-TODO
+If you're not familiar with this one, it might cause questions related to actual need of this class, because, at fist sight, it might look like [another]([programming practices - Can too much abstraction be bad? - Software Engineering Stack Exchange](https://softwareengineering.stackexchange.com/a/202482)) abstraction. First we need to find out what impact an ``Optional`` does besides obvious ``isPresent()`` which could be replaced by has-method.
 
 #### Comparing an Optional class and has-methods
 
-TODO
+Let's take a look on obious an simple case of getting a user name:
+
+```java
+// Bad
+final User user = app.getCurrentUser();
+return user == null ? "Unknown" : user.getName();
+// Better
+return app.hasCurrentUser() ? 
+        app.getCurrentUser().getName() : "Unknown"
+// Same?...
+return app.getCurrentUser().map(user -> user.getName())
+        .orElse("Unknown");
+```
+
+In such common cases we can find atleast two advantages of an ``Optional``:
+
+- If the return type wrapped in ``Optional`` that it have an ultimate expicit marker of possible inexistence (comparing to javadoc or has-method)
+
+- ``Optional`` provides inline interface for handling that inexistence, so you don't have to wrap everyting in ternary operator.
+
+Although, there's a huge downside when you're so confident that user you get is not null, you have to write something like:
+
+```java
+final User userImSureExists = getCurrentUser().get();
+```
+
+And that is really stupid. Some people say "how you ever be sure if you retreiveng an **OPTIONAL**", but sometimes it's really a case. An example is big state-control logic that was semantically separated by multiple methods to just not make a single big one, and all of them operating with multiple optional values. Let's say the number of values is enough to make method ugly by listing them as parameters, so it's easier to perform ``getCurrentUser()`` twice (especially if it's a simple getter), instead of do it once, and keep the value to another method, which will be invoked next. So the thing is you already has retreived a optional, and checked its existence, and when you retreive it a second time in the same call stack, it's obiously the same, so you have to do extra ugly ``.get()`` and suffer an IDE warning.
+
+That's definetly a downside, and it's not a single one. I don't wann list them all, but fi you intersted you may check [another article](https://blogs.oracle.com/javamagazine/post/optional-class-null-pointer-drawbacks) by a proffesor of University of Washington about it.
+
+There's also an extra text about when Optional might be a great at the end of an article.
 
 ### Case: Another method returns me a null and checking it is bulky and wacky
 
@@ -255,7 +278,7 @@ Before this one, the other cases I mentioned was only for the "root code" where 
 
 These cases are usual, and it's more recomended to use an ``Optional`` as functional interface. The biggest reason of that - decent readability improvement. Let's see an example
 
-```Java
+```java
 import static java.util.Optional.ofNullable;
 
 public class UserUtils {
@@ -272,7 +295,7 @@ public class UserUtils {
 
 This implementation of ``getFullUserName()`` still feels a little overcomplex, but keep in mind that it's not only performing a checks, it also provides default replacements for nullable fileds, so its functionality is extended. Also, notice that ``Objects.requireNonNullElse()`` method might be better somtimes. But what if we want to just throw NPE's, the code might be a way more simple:
 
-```Java
+```java
 public static String getFullUserName(User user) {
     return  requireNonNull(user.name()) + " " + 
             requireNonNull(user.surname()) + " " + 
@@ -290,7 +313,7 @@ In 2023, static code analysis is a common thing. It already integrated in most p
 
 Contract - is an explicit declaration of part or an entire behaviour of some logical code unit, which might be a class, method, field, etc.. . The contract by itself is described in javadoc or annotation of unit. The example of contract is ``@NonNull`` or ``@Nullable`` annotations. If some method or propety is marked with that, then the static analyser will leave a warning on its usage when it violates the contract. Also it might warn a programmer that perform operaions on ``@Nullable`` objects, which helps to decently decrease chances of unexpected brekeages at runtime. Here's few examples of how to use these annotations:
 
-```Java
+```java
 public class UserUtils {
 
     // Exlicitly saying that this method handles nullability
@@ -320,7 +343,7 @@ Both annotation mentioned are present in multiple frameworks and libs and all pf
 
 The [Project Lombok](https://projectlombok.org) is a sort of extension for Java language, that brings a lot of QoL improvements. It deserves a separate mention since its [``@NonNull``](https://projectlombok.org/features/NonNull) annotation is not only a contract, but also a decent preprocessor. It adds some highly configurable ``null`` checkings you would write manually. Basically it just removes bulkiness of
 
-```Java
+```java
 public static String getFullUserName(User user) {
     if (user == null) {
         throw new NullPointerException("User couldn't be null!")
@@ -332,7 +355,7 @@ public static String getFullUserName(User user) {
 
 By just adding an annotation to a ``user`` parameter
 
-```Java
+```java
 public static String getFullUserName(@NonNull User user) {
     // Blah-blah...
 }
@@ -346,7 +369,7 @@ Contracts, optionality abstractions, force-checks - are workarounds that might b
 
 Nullability - isn't straight-forward thing, it's super relative and undefined. Nobody can exactly say what is ``null`` in high-level languages. It just have no non-abstract definition, beacuse every time it wanted to be explained, people talk about references and memory, which moves the context under the hood. Even the languge by its own syntax hiding these low-level things from us: TODO
 
-```Java
+```java
 final Integer a = 1; // A reference to 1
 final int     b = 1; // Not a reference, but 1
 assert a != null // Yeah, it's a ref
@@ -386,7 +409,7 @@ In the more modern languages than Java or C#, we may find some decent improvemen
 
 In [Kotlin](https://kotlinlang.org/), everything is not null by default. Any nullable variable is marked by specific type suffix - ``?``. Also there's a quick check operator ``!!`` which is equal to ``Object.requireNonNull()`` in Java.
 
-```Kotlin
+```kotlin
 var nullableVar: Int? = null
 nullableVar = requestSomeValue()
 println(nullableVar) // prints "null"
@@ -401,7 +424,7 @@ The [Go](https://go.dev/) is a low-level (relatively) programming language, whic
 
 Also, Go has OOP methods, which are semantically functions, so they couldn't cause a panic when invoked on a ``nil``.
 
-```Go
+```go
 type User struct {
     Name string
     Surname string
@@ -432,11 +455,66 @@ TODO
 
 TODO
 
-
-
-## Colclusion
+## Conclusion
 
 TODO
+
+## Extra: My perfect Optional usage example
+
+As I already mentioned - an Optional provides really good functional interface which provides methods to work with it as collection. That collection may have one item or zero. When you retreive list of users, you expect that it might contain user and might not, right? So from the different sight, an ``Optional`` - is a container.
+
+When you think that way, the calling ``get()`` is starting to sound like absurd, like ``get(0)`` from collection with unkown size. So the thing is to avoid using ``get()`` and ``isPresent()`` methods, because they turn you back to inconvinient imperative way of working with concept of optionality. 
+
+Why is that inconvinient? Here's the case: we have a function that returns a user name by id, considering that all the context goes under the hood and we have a method that return users list from DB. Let's look on default implementation:
+
+```java
+public static Optional<String> /*or String*/ getUserNameById(Integer id) {
+    if (id != null) {
+        final List<User> list = getListFromDB();
+        if (list != null) {
+            for (User u : list) {
+                if (Objects.equals(u.id(), id))
+                    return ofNullable(u.name()); // or u.name()
+            }
+        }
+    }
+
+    return Optional.empty(); // or null
+}
+```
+
+Personally I never write that deep-nesting code, so I would write it like
+
+```java
+public static Optional<User> getUserNameById(Integer id) {
+    if (id == null) return Optional.empty();
+
+    final List<User> list = getListFromDB();
+    if (list == null) return Optional.empty();
+
+    for (User u : list) {
+        if (Objects.equals(u.id(), id))
+            return ofNullable(u.name());
+    }
+
+    return Optional.empty();
+}
+```
+
+In my personal opinion it's more readable imperative code. Anyways what if we will avoid all the imperativness and create hardcore functional code?
+
+```java
+public static Optional<String> getUserNameById(Integer id) {
+    return ofNullable(id).flatMap(v -> ofNullable(getListFromDB())
+            .flatMap(list -> list.stream().filter(u -> 
+                     Objects.equals(u.id(), id))
+            .findAny().map(User::name)));
+}
+```
+
+See, there's a big possibility to chain multiple optional operations that depenends on each previous, prefectly combined with streams and its functions. It loooks like Monad ([if I actually understand what is this though]([functional programming - Why are monads hard to explain? - Stack Overflow](https://stackoverflow.com/questions/70453016/why-are-monads-hard-to-explain))), to have an ability to exclude inextistence from operation you do.
+
+Anyway, maybe this code is perfect only for me, so you can just ignore it.
 
 ## Data sources and useful links
 
