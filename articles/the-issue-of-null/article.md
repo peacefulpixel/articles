@@ -236,11 +236,11 @@ public class Application {
 }
 ```
 
-If you're not familiar with this one, it might cause questions related to actual need of this class, because, at fist sight, it might look like [another]([programming practices - Can too much abstraction be bad? - Software Engineering Stack Exchange](https://softwareengineering.stackexchange.com/a/202482)) abstraction. First we need to find out what impact an ``Optional`` does besides obvious ``isPresent()`` which could be replaced by has-method.
+If you're not familiar with this one, it might cause questions related to actual need of that, because, at fist sight, it might look like [another](https://softwareengineering.stackexchange.com/a/202482) abstraction. First we need to find out what impact an ``Optional`` does besides obvious ``isPresent()`` which could be replaced by has-method.
 
 #### Comparing an Optional class and has-methods
 
-Let's take a look on obious an simple case of getting a user name:
+Let's take a look on obvious and simple case of getting a user name:
 
 ```java
 // Bad
@@ -256,21 +256,21 @@ return app.getCurrentUser().map(user -> user.getName())
 
 In such common cases we can find atleast two advantages of an ``Optional``:
 
-- If the return type wrapped in ``Optional`` that it have an ultimate expicit marker of possible inexistence (comparing to javadoc or has-method)
+- If the return type wrapped in ``Optional`` then it have an expicit marker of possible inexistence (comparing to javadoc or has-method implicity)
 
-- ``Optional`` provides inline interface for handling that inexistence, so you don't have to wrap everyting in ternary operator.
+- ``Optional`` provides inline interface for handling an inexistence, so you don't have to wrap everyting in ternary operator.
 
 Although, there's a huge downside when you're so confident that user you get is not null, you have to write something like:
 
 ```java
-final User userImSureExists = getCurrentUser().get();
+final User userImSureExists = getCurrentUser().get(); // IDE Warning
 ```
 
-And that is really stupid. Some people say "how you ever be sure if you retreiveng an **OPTIONAL**", but sometimes it's really a case. An example is big state-control logic that was semantically separated by multiple methods to just not make a single big one, and all of them operating with multiple optional values. Let's say the number of values is enough to make method ugly by listing them as parameters, so it's easier to perform ``getCurrentUser()`` twice (especially if it's a simple getter), instead of do it once, and keep the value to another method, which will be invoked next. So the thing is you already has retreived a optional, and checked its existence, and when you retreive it a second time in the same call stack, it's obiously the same, so you have to do extra ugly ``.get()`` and suffer an IDE warning.
+And that is really stupid. Some people say "how you ever be sure if you retreiveng an **OPTIONAL** which is sematically something that you couldn't be sure in", but sometimes it's really a case. An example is a big state-control logic that was semantically separated by multiple methods to just not make a single bulky one, and all of them operating with multiple optional values. Let's say the number of these is enough to make method ugly by listing them as parameters, so it's easier to perform ``getCurrentUser()`` twice (especially if it's a simple getter), instead of do it once, and keep the value to another method, which will be invoked next. So the thing is you already has retreived an optional, and checked its existence, and when you retreive it a second time in the same call stack, it's obiously the same, so you have to do extra ugly ``.get()`` and suffer an IDE warning.
 
-That's definetly a downside, and it's not a single one. I don't wann list them all, but fi you intersted you may check [another article](https://blogs.oracle.com/javamagazine/post/optional-class-null-pointer-drawbacks) by a proffesor of University of Washington about it.
+That's definetly a downside, and it's not a single one. I don't want to list all of them, at least because they are trivial, but if you intersted I reccomend to check [this article](https://blogs.oracle.com/javamagazine/post/optional-class-null-pointer-drawbacks).
 
-There's also an extra text about when Optional might be a great at the end of an article.
+There's also an extra text at the end of an article about cases where Optional might be a great solution.
 
 ### Case: Another method returns me a null and checking it is bulky and wacky
 
@@ -461,9 +461,21 @@ TODO
 
 ## Extra: My perfect Optional usage example
 
-As I already mentioned - an Optional provides really good functional interface which provides methods to work with it as collection. That collection may have one item or zero. When you retreive list of users, you expect that it might contain user and might not, right? So from the different sight, an ``Optional`` - is a container.
+As I already mentioned - an Optional provides really good functional interface which could change your way to work with it. One of those ways - is to understand an Optional as collection with maximum possible size of one. Comparing to a ``List``, for instance, which might contain one or more or zero elements, all its methods might be applied to an Optional, if it had those. So thechnically, ``Optional`` is a container.
 
-When you think that way, the calling ``get()`` is starting to sound like absurd, like ``get(0)`` from collection with unkown size. So the thing is to avoid using ``get()`` and ``isPresent()`` methods, because they turn you back to inconvinient imperative way of working with concept of optionality. 
+When you think that way, calling a ``get()`` is starting to sound like absurd, like ``get(0)`` from collection with unkown size. When you do this:
+
+```java
+if (!list.isEmpty()) doSometh(list.get(0));
+```
+
+it's semantically same like this:
+
+```java
+if (optional.isPresent()) doSomth(optional.get());
+```
+
+And you swithching context back, from collection to a **single** element. So the thing is to avoid using ``get()`` and ``isPresent()`` methods, because they turn you back to inconvinient imperative way of working with concept of optionality. 
 
 Why is that inconvinient? Here's the case: we have a function that returns a user name by id, considering that all the context goes under the hood and we have a method that return users list from DB. Let's look on default implementation:
 
@@ -483,7 +495,7 @@ public static Optional<String> /*or String*/ getUserNameById(Integer id) {
 }
 ```
 
-Personally I never write that deep-nesting code, so I would write it like
+Personally I never write that deep-nesting code, so for me, it's better to write it like:
 
 ```java
 public static Optional<User> getUserNameById(Integer id) {
@@ -512,9 +524,9 @@ public static Optional<String> getUserNameById(Integer id) {
 }
 ```
 
-See, there's a big possibility to chain multiple optional operations that depenends on each previous, prefectly combined with streams and its functions. It loooks like Monad ([if I actually understand what is this though](https://stackoverflow.com/questions/70453016/why-are-monads-hard-to-explain)), to have an ability to exclude inextistence from operation you do.
+See, there's opportunities to chain multiple optional operations that depenends on each previous, prefectly combined with streams and its functions. It loooks like Monad ([if I actually understand what is this though](https://stackoverflow.com/questions/70453016/why-are-monads-hard-to-explain)), to have an ability to exclude inextistence from operation you do (or a branch of operation).
 
-Anyway, maybe this code is perfect only for me, so yo2u can just ignore it.
+
 
 ## Data sources and useful links
 
