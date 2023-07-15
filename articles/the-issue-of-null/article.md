@@ -365,28 +365,36 @@ public static String getFullUserName(@NonNull User user) {
 
 Unfortunetly, even if we realize that nullability causes such critical issues we can't just give it up. Nullablity - isn't just a feature or [pattern](https://en.wikipedia.org/wiki/Null_object_pattern), it's more like one of the root concepts that carries entire language and paradigm design that was inventioned during the years. That's why it so painful to exclude ``null`` from your code.
 
-Contracts, optionality abstractions, force-checks - are workarounds that might be even worse solution sometimes. Even the ``null`` by itself usually solve problems, not causing them. Then more we use it - then bigger the chance of new issues
+Contracts, abstractions, force-checks - are workarounds that might be even worse solution sometimes. Even the ``null`` keyword by itself usually not causing problems, but solving them, because it's obviously was mad for a good purpuse. Sad, but over the time we just figured that then more we use it - then bigger the chance of new bugs appear.
 
-Nullability - isn't straight-forward thing, it's super relative and undefined. Nobody can exactly say what is ``null`` in high-level languages. It just have no non-abstract definition, beacuse every time it wanted to be explained, people talk about references and memory, which moves the context under the hood. Even the languge by its own syntax hiding these low-level things from us: TODO
+Nullability - isn't a straight-forward thing, it's really relative and undefined. Nobody can exactly say what is ``null`` in high-level languages. It just have no non-abstract definition, beacuse every time it wanted to be explained, people talk about references and memory, which moves the context under the hood. Even the languge by its own syntax hiding these low-level things from us:
 
 ```java
 final Integer a = 1; // A reference to 1
 final int     b = 1; // Not a reference, but 1
-assert a != null // Yeah, it's a ref
-assert 1 != null // Compiler error
+final var     c = 1; // Not an Integer, but int
+
+assert a != null; // Yeah, it's a ref
+assert 1 != null; // Compiler error
 ```
+
+*Expression `Integer a = 1` not means `new Integer(1)`, but more similiar to `Integer.valueOf(1)`, because it wanted to not initiate new reference*
+
+It's better if we don't have ``null``, but the ``null`` is a brick in the language wall. If you remove it - sooner or later, the whole thing fall. You may hide it by putting some concrete or wallpaper over, but remember that it still be behind your workarounds, new languages with default non-null-immutable values, designs and patterns, it's will be there, and one day you will have to deal with it.
+
+It's better if we don't have `null`, but since it's here, **we have to use it.**
 
 ### Null in low-level languages: C
 
-If you didn't knew, here's fun fact that definetly surprise you if you never used low-level languages - the C definition of NULL is:
+Here's fun fact that definetly surprise you if you never used low-level languages - the C definition of NULL is:
 
-```C
+```c
 #define NULL 0
 ```
 
-Yes, ``NULL == 0``, it's an integer. An it's actually makes sense, because pointers (references) in C are actually integers (well, long integers sometimes). See, the low-level languages allows you to directly manage memory, so any pointer (in short words) is a RAM address. And in C, you can have a pointer to primivitive, which you would nullify in future.
+Yes, ``NULL`` is ``0``. It's an integer. And it's actually makes sense, because pointers (references) in C are actually integers. See, the low-level languages allows you to directly manage memory, so any pointer, in short words, is an address of a RAM cell. And in C, you can have a pointer to primivitive, which you would nullify in future.
 
-```C
+```c
 /** Refering to example above on Java */
 void foo() {
     int *a;
@@ -397,13 +405,42 @@ void foo() {
 }
 ```
 
-So here we see an actual (semantically correct) reference to something, and we can access an actual data by this reference. We can retrieve and put the data by that, and we use ``NULL`` or a ``0``, to say that there's no data and you can't put anythyng here. The ``NULL`` is conventioned address that points to nothing, and you may use it to point to nothing.
+So here we see an actual (semantically correct) reference to something, and we can access an actual data by this reference. We can retrieve and put the data by that, and we use ``NULL`` or a ``0``, to say that there's no data and you can't put anythyng there. The ``NULL`` is conventioned address that points to nothing, and you may use it to point to nothing.
 
-TODO
+In addition to that, C doesn't have boolean type but true and false are defined as following constants:
+
+```c
+#define TRUE  1
+#define FALSE 0
+```
+
+Zero is also a ``FALSE`` in the C world which adds some simplicity to null-checks
+
+```c
+char* get_user_name_by_id(int id) {
+    user_iterable_t *user = get_all_users();
+    if (!user) return NULL;
+
+    while (user->next) {
+        if (user->id == id) goto user_found;
+        user = user->next;
+    }
+    return NULL;
+
+    user_found:
+    void *p = strcpy(user->name)
+    user_iterable_free(user);
+    return p;
+}
+```
+
+See, the ``getUserNameById()`` function still bulky, but pretty readable for such low-level language that is so close to assembler and machine instructions in meanings.
+
+Speaking of any low-level language, the necesserity of nullability more dependent on performance and optimization questions. Having an ``Optional``, or immutability, or any other "NPE avoiding mechanism" will slightly increase consumption of memory and processing resources which are semantically redurand in context of machine execution. If you have a GC in your environment or even an entire VM, these optimizations are worthless.
 
 ### How modern languages handle nullability
 
-In the more modern languages than Java or C#, we may find some decent improvements when we work with nulls.
+In the more modern languages than Java or C#, we may find some decent improvements when we work with nulls. These improvements might be convinient ways to avoid nullability or cases when we get NPEs.
 
 #### Kotlin
 
@@ -414,15 +451,32 @@ var nullableVar: Int? = null
 nullableVar = requestSomeValue()
 println(nullableVar) // prints "null"
 println(nullableVar!!) // throws an NPE here
+
+var nonNullVar: Int = null // Compiler error
 ```
 
-TODO
+Also there's a safe invocation operator ``?.`` which is equivalent to ``.`` but will not perform a call if the object is null;
+
+```kotlin
+class Printer {
+    fun print() = println("Im printing")
+}
+
+fun main() {
+    var p: Printer? = Printer()
+    p?.print() // prints "Im printing"
+    p = null
+       p?.print() // does nothing
+}
+```
+
+Well, Kotlin is known as a "Sugar language" so [there's](https://kotlinlang.org/docs/null-safety.html) even more ways to avoid nullability and its issues.
 
 #### Golnag
 
 The [Go](https://go.dev/) is a low-level (relatively) programming language, which was designed as improvment and modern alternative of the C language. Common types, inculding structures, strings and arrays couldn't be ``nil``. This keyword is made for pointers (like in C), interfaces, functions, slices, maps and channels (all of these are types). 
 
-Also, Go has OOP methods, which are semantically functions, so they couldn't cause a panic when invoked on a ``nil``.
+Also, Go has OOP methods, which are semantically functions (similiar to Kotlin extensions), so they couldn't cause a panic when invoked on a ``nil``.
 
 ```go
 type User struct {
@@ -445,19 +499,76 @@ func main() {
 }
 ```
 
-That's should be a pretty useful feature in object-oriented architecture designs, because it moves nil-handling responsibilities from object to the method of that, which could check is ``this`` is ``nil``. That makes null value more clear, because with this way the null is actually typed, so when we say the User is null, this user still has a full name. Comparing to Java, it's not guarantees that ``this`` is not null, but improves semantic corectness, which decreases breakage chanses.
+That's should be a pretty useful feature in object-oriented architecture designs, because it moves nil-handling responsibilities from object to the method of that, which could check is ``this`` a ``nil`` or not. That makes null value more clear, because with this way the null is actually typed, so when we say the User is null, this user still has a full name. Comparing to Java, it's not guarantees that ``this`` is not null, but improves semantic corectness, which decreases breakage chanses.
 
 #### Rust
 
-TODO
+The [Rust](https://www.rust-lang.org/) goes kinda hardcore at this point - it just have no nulls. The solution is similar to java - an optional data structure, but it's a generified [enum](https://doc.rust-lang.org/std/option/enum.Option.html).
+
+```rust
+pub enum Option<T> {
+    None,
+    Some(T),
+}
+```
+
+That enum has multiple methods similiar to Java's ``Optional``.
+
+In the most common cases, like [SQL result mappings](https://docs.rs/postgres/latest/postgres/) or [JSON mappings](https://github.com/serde-rs/json), it's common to use an optionality techique (use the ``Option`` enum or create a new with "null" value). But Rust, also have an [unsafe part](https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html) of it, which allowing to use nulls
+
+```rust
+use std::ptr;
+
+let p: *const i32 = ptr::null();
+assert!(p.is_null());
+```
+
+As you can see, methods here are works just the same as in Golang, so it's definetly bringing some modernity to avoid null reference panics. Although, I should mention that Rust community are [hardly force](https://www.reddit.com/r/rust/comments/epzukc/actix_web_repository_cleared_by_author_who_says/) people to not use an ``unsafe`` so it's more correct to say that optionality is an only way in Rust.
 
 #### Ruby
 
-TODO
+The ``nil`` in the Ruby language is not a value but an object of the ``NilClass`` type. It's a pretty good decidion considering its dynamic typing system. The huge benifit of that is an ability to percieve it as actual value and convert to another types. Ruby classes has multiple methods named ``to_i()`` or ``to_s()``, for example, an these methods converting values to another that corresponding them (int and string for our case).
+
+```ruby
+def sum(a, b)
+  a.to_i() + b.to_i()
+end
+
+something = nil
+anything  = "2"
+print sum(something, anything) # Will print 2
+                               # because nil was converted to 0
+```
+
+The ``NilClass`` source file is also available in the [language core package](https://github.com/rubinius/rubinius/blob/master/core/nil.rb), so a ``nil`` becomes an explicit thing.
+
+Besides that, a `nil` and `false` are only things that "falsy" in Ruby, so null-checks are the same as in C or a JavaScript:
+
+```ruby
+array = [1,2,3,4,5]
+if array[999] && array[999].size
+  # Will go there only if array has 999th element and it has size
+end
+```
+
+Ruby also implements the safe invocation feature, which works the same as in Kotlin, but its operator is ``&.`` instead.
+
+```ruby
+something = nil
+print(something&.value, "text") # Will print text
+print(something.value, "text") # NoMethodError
+
+# Short version of previous if
+if array[999]&.size
+  # Will go there only if array has 999th element and it has size
+end
+```
 
 ## Conclusion
 
-TODO
+I really hope, that this article will help someone to understand the null and its issues. The best solution for the null issue - is being noticed aboud that. Some people getting [too impressed](https://www.yegor256.com/2014/05/13/why-null-is-bad.html) when they realise the issue, and starting to cover all the code with optionality and exceptions. The good programmer knows the language and then he knows how to code well and how to ``null`` well.
+
+Pay attention to ``null``s, they're more than you think they are.
 
 ## Extra: My perfect Optional usage example
 
@@ -525,8 +636,6 @@ public static Optional<String> getUserNameById(Integer id) {
 ```
 
 See, there's opportunities to chain multiple optional operations that depenends on each previous, prefectly combined with streams and its functions. It loooks like Monad ([if I actually understand what is this though](https://stackoverflow.com/questions/70453016/why-are-monads-hard-to-explain)), to have an ability to exclude inextistence from operation you do (or a branch of operation).
-
-
 
 ## Data sources and useful links
 
