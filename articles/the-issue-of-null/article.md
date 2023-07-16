@@ -1,12 +1,12 @@
 # The issue of null
 
-In 2009 [Tony Hoare](https://en.wikipedia.org/wiki/Tony_Hoare) has declared that invention of nullability was his ["Billion dollar mistake"](https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/). "This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years" he said. It's hard to find an opinion which could disagree with that, especially if their primary language is high-level (Java/C#/etc...). Popular authors and programmer refers to that Tony Hoare quote that I started with. At the moment of 2023 it's more like a good practice or even convention to avoid ``null``s in your code. Why? Let's find it out.
+In 2009 [Tony Hoare](https://en.wikipedia.org/wiki/Tony_Hoare) has declared that invention of nullability was his ["Billion dollar mistake"](https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/). "This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years" he said. It's hard to find an opinion which could disagree with that, especially if their primary language is high-level (Java/C#/etc...). Popular authors and programmers are also refers to that Tony Hoare quote that I started with. At the moment of 2023 it's more like a good practice or even convention to avoid ``null``s in your code. Why? Let's find it out.
 
-**Disclaimer:** I will use Java as an example language, but most of the text and code are appliable to any other language that has a ``null`` keyword. If I mention some class or library/framework, you may google "${ClassLibName} C# alternative" and I promise you find something similar.
+**Disclaimer:** I will use Java as an example language, but most of the text and code are appliable to any other language that has a ``null``/``nil`` keyword. If I mention some class or library/framework, you may google "${ClassLibName} C# alternative" and I promise you find something similar.
 
 ## Exploring the issue
 
-The ``null`` by itself is a unique value for any type (excluding primitives) and could be assigned at any time. Technically, that is manifestation of the ["dynamic typing system"](https://en.wikipedia.org/wiki/Type_system#Dynamic_type_checking_and_runtime_type_information) but for most languages it's more like an only dynamic exception of the static typing system. Although, it still bringing all the dynamic typing downsides to the language and here they are.
+The ``null`` by itself is a unique value for any type (excluding primitives) and could be assigned at any time. Technically, that is manifestation of the [dynamic typing system](https://en.wikipedia.org/wiki/Type_system#Dynamic_type_checking_and_runtime_type_information) but for most languages it's more like an only dynamic exception of the static typing system. Although, it still bringing all the dynamic typing downsides to the language and here they are.
 
 ### You may get not what you expect
 
@@ -42,13 +42,13 @@ if (user != null) {
 return ""; // Or what?????
 ```
 
-Now it's safe? Yeah, but we got 15 lines instead of one line of simple and direct logic. Also, the code below still may have to produce unexpected results like just two spaces and that's it.
+Is it safe now? Yeah, but we got 15 weird lines instead of one line of simple and direct logic. Also, the code below still may have to produce unexpected results like just two spaces and that's it.
 
 Do you see the comment on the last line? I left it because I don't really understand what should I do if I got ``null`` instead of a ``User`` instance. **And it's not my fault**, because I writing my method for a ``User``, not for a ``Car``, ``Kittie`` or ``null``. That's the point - you define what you expect and work with it.
 
 ### Theoretical correctness
 
-Object-oriented programming idea is based on our material world. We look in the window, we see cars riding streets. Multiple cars have multiple wheels. Here is an idea - class Wheel and four instances of that in the class Car. Straight and explicit. We don't need to know what that Wheels made of (usually), since it's a responsibility of a wheel factory and government standards. We don't need to know how long it takes to create a wheel - the wheel factory might improve it if it's possible. But if you really need some special wheels, you can open your own wheel factory and take that responsibility on yourself. Anyway, now I want to replace a broken wheel in my car so here's my object-oriented story about that:
+Object-oriented programming idea is based on our material world. We look in the window, we see cars riding streets. Multiple cars have multiple wheels. Here is an idea - class Wheel and four instances of that in the class Car. Straight and explicit. We don't need to know what these Wheels made of (usually), since it's a responsibility of a wheel factory and government standards. We don't need to know how long it takes to create a wheel - the wheel factory might improve it if it's possible. But if you really need some special wheels, you can open your own wheel factory and take that responsibility on yourself. Anyway, now I want to replace a broken wheel in my car so here's my object-oriented story about that:
 
 I going to shop, buying a wheel, then going to my garage, removing a broken wheel, putting the new one I bought and when I tighten the bolts on it - **BOOM!** the universe collapsing and I don't even know why, because all that path I made, I didn't even knew that I was carrying a ``null`` instead of a wheel, because a wheel shop is out of stock.
 
@@ -440,7 +440,7 @@ Speaking of any low-level language, the necessity of nullability is more depende
 
 ### How modern languages handle nullability
 
-In the more modern languages than Java or C#, we may find some decent improvements when we work with nulls. These improvements might be convenient ways to avoid nullability or cases when we get NPEs.
+In the more modern languages than Java, we may find some decent improvements when we work with nulls. These improvements might be convenient ways to avoid nullability or cases when we get NPEs.
 
 #### Kotlin
 
@@ -527,7 +527,7 @@ As you can see, methods here are works just the same as in Golang, so it's defin
 
 #### Ruby
 
-The ``nil`` in the Ruby language is not a value but an object of the ``NilClass`` type. It's a pretty good decision considering its dynamic typing system. The huge benefit of that is an ability to perceive it as actual value and convert to another type. Ruby classes have multiple methods named ``to_i()`` or ``to_s()``, for example, an these methods converting values to another that corresponding them (int and string for our case).
+The ``nil`` in the Ruby language is not a value but an object of the ``NilClass`` type. It's a pretty good decision considering its dynamic typing system. The huge benefit of that is an ability to perceive it as actual value and convert to another type. Ruby classes have multiple methods named ``to_i()`` or ``to_s()``, for example, and these methods converting values to another that corresponding them (int and string for our case).
 
 ```ruby
 def sum(a, b)
@@ -566,29 +566,29 @@ end
 
 ## Conclusion
 
-I really hope, that this article will help someone to understand the null and its issues. The best solution for the null issue - is being noticed aboud that. Some people getting [too impressed](https://www.yegor256.com/2014/05/13/why-null-is-bad.html) when they realise the issue, and starting to cover all the code with optionality and exceptions. The good programmer knows the language and then he knows how to code well and how to ``null`` well.
+I really hope that this article will help someone to understand the null and its issues. The best solution for the null issue - is being noticed about that. Some people getting [too impressed](https://www.yegor256.com/2014/05/13/why-null-is-bad.html) when they realise the issue, and starting to cover all the code with optionality and exceptions. The good programmer knows the language and then he knows how to code well and how to ``null`` well.
 
 Pay attention to ``null``s, they're more than you think they are.
 
 ## Extra: My perfect Optional usage example
 
-As I already mentioned - an Optional provides really good functional interface which could change your way to work with it. One of those ways - is to understand an Optional as collection with maximum possible size of one. Comparing to a ``List``, for instance, which might contain one or more or zero elements, all its methods might be applied to an Optional, if it had those. So thechnically, ``Optional`` is a container.
+As I already mentioned - an Optional provides really good functional interface which could change your way to work with it. One of those ways - is to understand an Optional as a collection with maximum possible size of one. Comparing to a ``List``, for instance, which might contain one or more or zero elements, all its methods might be applied to an Optional, if it had those. So technically, ``Optional`` is a container.
 
-When you think that way, calling a ``get()`` is starting to sound like absurd, like ``get(0)`` from collection with unkown size. When you do this:
+When you think that way, calling a ``get()`` is starting to sound like absurd, like ``get(0)`` from a collection with unknown size. When you do this:
 
 ```java
 if (!list.isEmpty()) doSometh(list.get(0));
 ```
 
-it's semantically same like this:
+it's semantically the same as this:
 
 ```java
 if (optional.isPresent()) doSomth(optional.get());
 ```
 
-And you swithching context back, from collection to a **single** element. So the thing is to avoid using ``get()`` and ``isPresent()`` methods, because they turn you back to inconvinient imperative way of working with concept of optionality. 
+And you switching context back, from collection to a **single** element. So the thing is to avoid using ``get()`` and ``isPresent()`` methods, because they turn you back to an inconvenient imperative way of working with the concept of optionality. 
 
-Why is that inconvinient? Here's the case: we have a function that returns a user name by id, considering that all the context goes under the hood and we have a method that return users list from DB. Let's look on default implementation:
+Why is that inconvenient? Here's the case: we have a function that returns a user name by id, considering that all the context goes under the hood and we have a method that returns users list from DB. Let's look on default implementation:
 
 ```java
 public static Optional<String> /*or String*/ getUserNameById(Integer id) {
@@ -606,7 +606,7 @@ public static Optional<String> /*or String*/ getUserNameById(Integer id) {
 }
 ```
 
-Personally I never write that deep-nesting code, so for me, it's better to write it like:
+Personally, I never write that deep-nesting code, so for me, it's better to write it like:
 
 ```java
 public static Optional<User> getUserNameById(Integer id) {
@@ -624,7 +624,7 @@ public static Optional<User> getUserNameById(Integer id) {
 }
 ```
 
-In my personal opinion it's more readable imperative code. Anyways what if we will avoid all the imperativness and create hardcore functional code?
+In my personal opinion, it's more a readable imperative code. Anyway, what if we will avoid all the imperativeness and create hardcore functional code?
 
 ```java
 public static Optional<String> getUserNameById(Integer id) {
@@ -635,7 +635,7 @@ public static Optional<String> getUserNameById(Integer id) {
 }
 ```
 
-See, there's opportunities to chain multiple optional operations that depenends on each previous, prefectly combined with streams and its functions. It loooks like Monad ([if I actually understand what is this though](https://stackoverflow.com/questions/70453016/why-are-monads-hard-to-explain)), to have an ability to exclude inextistence from operation you do (or a branch of operation).
+See, there are opportunities to chain multiple optional operations that depend on each previous, perfectly combined with streams and its functions. It looks like Monad ([if I actually understand what is this though](https://stackoverflow.com/questions/70453016/why-are-monads-hard-to-explain)), to have an ability to exclude inexistence from the operation you do (or a branch of operation).
 
 ## Data sources and useful links
 
@@ -652,8 +652,23 @@ See, there's opportunities to chain multiple optional operations that depenends 
 
 ### Opinions of people
 
+[Jon Skeet](https://github.com/jskeet) (Developer, Writer) [ref](https://en.wikipedia.org/wiki/Special:BookSources?isbn=978-1617294532)
+
+> The consistent use of a single type to represent a possibly missing value enables the language to make our lives easier, and library authors have an idiomatic way of representing it in their API surface, too.
+
 [Anders Hejlsberg](https://en.wikipedia.org/wiki/Anders_Hejlsberg) (Microsoft Lead Architect of the C# language): [ref](https://www2.computerworld.com.au/article/261958/a-z_programming_languages_c_/?pp=3)
 
 > 50% of the bugs that people run into today, coding with C# in our platform, and the same is true of Java for that matter, are probably null reference exceptions. If we had had a stronger type system that would allow you to say that ‘this parameter may never be null, and you compiler please check that at every call, by doing static analysis of the code’. Then we could have stamped out classes of bugs.
 
-TODO
+[Robert Martin](https://en.wikipedia.org/wiki/Robert_C._Martin) (Sotware engineer, [Agile Manifesto](https://en.wikipedia.org/wiki/Agile_Manifesto "Agile Manifesto") author ): [ref](https://en.wikipedia.org/wiki/Special:BookSources/0-13-597444-5)
+
+> Most of us have also been burned by forgetting to test for null. Common though the idiom may be, it is ugly and error prone.
+
+[Martin Fowler](https://en.wikipedia.org/wiki/Martin_Fowler_(software_engineer)) (Software engineer, Speaker, Writer): [ref](https://martinfowler.com/eaaCatalog/specialCase.html)
+
+> Nulls are awkward things in object-oriented programs because
+> they defeat polymorphism.
+
+[Doug Lea](https://en.wikipedia.org/wiki/Doug_Lea) (Professor of computer science): [ref](https://github.com/google/guava/wiki/UsingAndAvoidingNullExplained)
+
+> Null sucks.
