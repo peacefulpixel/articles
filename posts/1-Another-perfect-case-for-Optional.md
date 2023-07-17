@@ -71,8 +71,8 @@ Then I going to ``askFor()`` method and realize that it so dumb, so I just use a
 
 ```java
 public final Optional<T> askFor() {
-    return getResource().flatMap(url -> 
-            Optional.ofNullable(lazyVal = build(url)));
+    return Optional.ofNullable(lazyVal).or(() -> 
+            getResource().map(url -> lazyVal = buildFromURL(url)));
 }
 ```
 
